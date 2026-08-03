@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-jakarta: 'Plus Jakarta Sans', sans-serif;
+}
+
+body {
+  background: #FBFCFE;
+  color: #182233;
+}
+
+.btn-primary {
+  @apply bg-primary text-white font-bold rounded-full px-6 py-3.5 inline-flex items-center gap-2 shadow-pop hover:bg-primary-dark transition;
+}
+
+.card {
+  @apply bg-white border border-border rounded-xl2 shadow-card;
+}
+
+.opt-card {
+  @apply bg-white border-2 border-border rounded-2xl px-2 py-4 text-center cursor-pointer transition hover:-translate-y-0.5;
+}
+.opt-card.selected {
+  @apply border-primary bg-primary-light;
+}
+
+@keyframes flashHi {
+  0%, 100% { background-color: transparent; }
+  20% { background-color: theme('colors.primary.light'); }
+}
+.flash-highlight {
+  animation: flashHi 1.2s ease;
+  border-radius: 10px;
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
