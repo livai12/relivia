@@ -3,16 +3,41 @@
 @tailwind utilities;
 
 :root {
-  --font-jakarta: 'Plus Jakarta Sans', sans-serif;
+  /* Base */
+  --color-bg: #FAFAFA;
+  --color-surface: #FFFFFF;
+  --color-ink: #1F2937;
+  --color-soft: #6B7280;
+  --color-border: #E5E7EB;
+
+  /* Primary (purple) */
+  --color-primary: #8B5CF6;
+  --color-primary-light: #F3EEFF;
+  --color-primary-deep: #6D28D9;
+  --color-accent: #C4B5FD;
+
+  /* Success */
+  --color-green: #22C55E;
+  --color-green-tint: #ECFDF3;
+
+  /* Utility */
+  --color-ink-inverse: #FFFFFF;
+  --shadow-card: 0 1px 2px rgba(31, 41, 55, 0.04), 0 8px 24px -8px rgba(31, 41, 55, 0.10);
+  --shadow-pop: 0 8px 24px -6px rgba(139, 92, 246, 0.45);
+  --radius-xl2: 20px;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: #FBFCFE;
-  color: #182233;
+  background: var(--color-bg);
+  color: var(--color-ink);
 }
 
 .btn-primary {
-  @apply bg-primary text-white font-bold rounded-full px-6 py-3.5 inline-flex items-center gap-2 shadow-pop hover:bg-primary-dark transition;
+  @apply bg-primary text-white font-bold rounded-full px-6 py-3.5 inline-flex items-center gap-2 shadow-pop hover:bg-primary-deep transition;
 }
 
 .card {
@@ -22,20 +47,70 @@ body {
 .opt-card {
   @apply bg-white border-2 border-border rounded-2xl px-2 py-4 text-center cursor-pointer transition hover:-translate-y-0.5;
 }
+
 .opt-card.selected {
   @apply border-primary bg-primary-light;
 }
 
 @keyframes flashHi {
-  0%, 100% { background-color: transparent; }
-  20% { background-color: theme('colors.primary.light'); }
+
+  0%,
+  100% {
+    background-color: transparent;
+  }
+
+  20% {
+    background-color: var(--color-primary-light);
+  }
 }
+
 .flash-highlight {
   animation: flashHi 1.2s ease;
   border-radius: 10px;
 }
 
 @keyframes rise {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes floatUp {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-9px);
+  }
+}
+
+.animate-float {
+  animation: floatUp 7s ease-in-out infinite;
+}
+
+@keyframes chipDrift {
+
+  0%,
+  100% {
+    transform: translateX(0);
+    opacity: 0.85;
+  }
+
+  50% {
+    transform: translateX(6px);
+    opacity: 1;
+  }
+}
+
+.animate-drift {
+  animation: chipDrift 5s ease-in-out infinite;
 }

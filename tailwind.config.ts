@@ -5,7 +5,16 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        primary: { DEFAULT: "#2F6FED", dark: "#1F52B8", light: "#EAF1FF", tint: "#DCE9FF" },
+        primary: {
+          DEFAULT: "#8B5CF6",
+          dark: "#6D28D9",
+          deep: "#6D28D9",
+          light: "#F3EEFF",
+          tint: "#F3EEFF",
+        },
+        accent: {
+          DEFAULT: "#C4B5FD",
+        },
         amber: { DEFAULT: "#F5A623", tint: "#FFF2DC", deep: "#9A6A0A" },
         green: { DEFAULT: "#33B189", tint: "#DEF6EE", deep: "#1B7A5C" },
         red: { DEFAULT: "#F2684B", tint: "#FDE7E1", deep: "#C1442B" },
