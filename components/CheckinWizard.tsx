@@ -100,7 +100,7 @@ export default function CheckinWizard({ patientName }: { patientName: string }) 
           title={`Gimana suasana hati ${patientName} hari ini?`}
           hint="Lihat secara umum ya, nggak perlu detail banget."
         >
-          <div className="grid grid-cols-5 gap-2.5">
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-2.5">
             {MOOD_OPTIONS.map((o) => (
               <button
                 key={o.v}
@@ -108,7 +108,7 @@ export default function CheckinWizard({ patientName }: { patientName: string }) 
                 className={`opt-card ${form.mood === o.v ? "selected" : ""}`}
               >
                 {o.icon}
-                <span className="text-xs font-semibold text-soft">{o.label}</span>
+                <span className="text-[11px] sm:text-xs font-semibold text-soft">{o.label}</span>
               </button>
             ))}
           </div>
@@ -117,7 +117,7 @@ export default function CheckinWizard({ patientName }: { patientName: string }) 
 
       {step === 1 && (
         <Step eyebrow="LANGKAH 2 DARI 5" title="Semalam tidurnya gimana?" hint="Perkiraan aja, nggak perlu catat jam pastinya." onBack={() => setStep(0)}>
-          <div className="grid grid-cols-5 gap-2.5">
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-2.5">
             {SLEEP_OPTIONS.map((o) => (
               <button
                 key={o.v}
@@ -125,7 +125,7 @@ export default function CheckinWizard({ patientName }: { patientName: string }) 
                 className={`opt-card ${form.sleep_quality === o.v ? "selected" : ""}`}
               >
                 {o.icon}
-                <span className="text-xs font-semibold text-soft">{o.label}</span>
+                <span className="text-[11px] sm:text-xs font-semibold text-soft">{o.label}</span>
               </button>
             ))}
           </div>
@@ -134,7 +134,7 @@ export default function CheckinWizard({ patientName }: { patientName: string }) 
 
       {step === 2 && (
         <Step eyebrow="LANGKAH 3 DARI 5" title="Gimana interaksi sosialnya?" hint="Ngobrol, keluar kamar, respons ke keluarga." onBack={() => setStep(1)}>
-          <div className="grid grid-cols-5 gap-2.5">
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-2.5">
             {SOCIAL_OPTIONS.map((o) => (
               <button
                 key={o.v}
@@ -142,7 +142,7 @@ export default function CheckinWizard({ patientName }: { patientName: string }) 
                 className={`opt-card ${form.social_interaction === o.v ? "selected" : ""}`}
               >
                 {o.icon}
-                <span className="text-xs font-semibold text-soft">{o.label}</span>
+                <span className="text-[11px] sm:text-xs font-semibold text-soft">{o.label}</span>
               </button>
             ))}
           </div>

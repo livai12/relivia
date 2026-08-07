@@ -52,7 +52,7 @@ export default function CommunityFeed({ posts, currentUserId }: { posts: Communi
         const isMine = post.author_id === currentUserId;
         const count = localCounts[post.id] ?? post.helpful_count;
         return (
-          <div key={post.id} className="card px-[22px] py-5">
+          <div key={post.id} className="card px-5 py-4 sm:px-[22px] sm:py-5">
             <div className="flex items-center gap-3 mb-3">
               <div
                 className="w-[38px] h-[38px] rounded-full text-white flex items-center justify-center font-extrabold text-sm flex-none"
@@ -60,7 +60,7 @@ export default function CommunityFeed({ posts, currentUserId }: { posts: Communi
               >
                 {name.charAt(0).toUpperCase()}
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-sm font-extrabold flex items-center gap-1.5 m-0">
                   {isMine ? "Kamu" : name}
                   {verified && (

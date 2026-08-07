@@ -112,13 +112,13 @@ export default function SummaryClient({
         </button>
       </div>
 
-      <div className="card max-w-[720px] p-10">
-        <div className="flex justify-between items-start pb-5 mb-6 border-b border-border">
+      <div className="card max-w-[720px] p-5 md:p-10">
+        <div className="flex flex-col sm:flex-row sm:justify-between items-start gap-2 pb-5 mb-6 border-b border-border">
           <div>
             <h3 className="text-xl font-extrabold mb-1">Ringkasan Konsultasi</h3>
             <div className="text-[11px] font-bold uppercase tracking-wide text-faint">Relivia · Catatan Caregiver Terstruktur</div>
           </div>
-          <div className="text-right text-xs text-soft leading-relaxed">
+          <div className="text-left sm:text-right text-xs text-soft leading-relaxed">
             Periode: {rangeLabel} ({periodLabel})<br />
             Dicetak: {new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
           </div>

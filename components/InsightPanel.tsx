@@ -36,7 +36,7 @@ export default function InsightPanel({ patientName, latest }: { patientName: str
 
   return (
     <>
-      <div className="rounded-[24px] p-9 mb-6 text-white flex items-center justify-between gap-6 flex-wrap bg-gradient-to-br from-primary to-[#4E7FF0]">
+      <div className="rounded-3xl p-6 md:p-9 mb-6 text-white flex items-center justify-between gap-5 flex-wrap bg-gradient-to-br from-primary to-[#4E7FF0]">
         <div>
           <h3 className="text-xl font-extrabold mb-2">Siap dianalisis</h3>
           <p className="text-sm text-primary-tint max-w-[420px] leading-relaxed">
@@ -44,7 +44,7 @@ export default function InsightPanel({ patientName, latest }: { patientName: str
             Hanya pola yang layak dibicarakan bareng psikiater.
           </p>
         </div>
-        <button onClick={generate} disabled={loading} className="bg-white text-primary-dark font-bold rounded-full px-6 py-3.5 hover:bg-[#F2F6FF] disabled:opacity-70 inline-flex items-center gap-2">
+        <button onClick={generate} disabled={loading} className="w-full sm:w-auto justify-center bg-white text-primary-dark font-bold rounded-full px-6 py-3.5 hover:bg-[#F2F6FF] disabled:opacity-70 inline-flex items-center gap-2">
           {loading ? "Menganalisis…" : (
             <>
               {insight ? "Buat ulang Insight" : "Buat Insight"} <IconSparkle size={15} />

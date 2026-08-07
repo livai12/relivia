@@ -60,8 +60,8 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-bg px-6">
-      <div className="card w-full max-w-sm p-8">
+    <main className="min-h-screen flex items-center justify-center bg-bg px-5 sm:px-6 py-6">
+      <div className="card w-full max-w-sm p-6 sm:p-8">
         <div className="flex items-center gap-2.5 mb-8">
           <Logo size={30} />
           <span className="font-extrabold text-lg">Relivia</span>

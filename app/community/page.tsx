@@ -24,7 +24,7 @@ export default async function CommunityPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <TopNav patientName={patient.name} patientAge={patient.age} />
-      <div className="flex-1 px-[5vw] py-8 max-w-[820px] mx-auto w-full">
+      <div className="flex-1 px-4 md:px-[5vw] py-8 max-w-[820px] mx-auto w-full">
         <div className="flex items-end justify-between gap-4 flex-wrap mb-5">
           <div>
             <h2 className="text-2xl font-extrabold mb-1">Komunitas Caregiver</h2>

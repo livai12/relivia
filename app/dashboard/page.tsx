@@ -29,7 +29,7 @@ export default async function DashboardPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <TopNav patientName={patient.name} patientAge={patient.age} />
-      <div className="flex-1 px-[5vw] py-8 max-w-[1180px] mx-auto w-full">
+      <div className="flex-1 px-4 md:px-[5vw] py-8 max-w-[1180px] mx-auto w-full">
         <div className="flex items-end justify-between gap-4 flex-wrap mb-6">
           <div>
             <h2 className="text-2xl font-extrabold mb-1">Halo</h2>
@@ -49,9 +49,9 @@ export default async function DashboardPage() {
         </div>
 
         <div className="card mb-5">
-          <div className="flex items-center justify-between px-6 py-5 border-b border-border">
+          <div className="flex flex-wrap items-center justify-between gap-2 px-4 sm:px-6 py-5 border-b border-border">
             <h3 className="font-extrabold text-base">Grafik Pemantauan</h3>
-            <div className="flex gap-4 text-xs text-soft font-medium">
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-soft font-medium">
               <span className="flex items-center gap-1.5"><i className="w-2.5 h-0.5 bg-primary inline-block" /> Mood</span>
               <span className="flex items-center gap-1.5"><i className="w-2.5 h-0.5 bg-amber inline-block" /> Tidur</span>
               <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-sm bg-green inline-block" /> Obat diminum</span>
@@ -62,23 +62,23 @@ export default async function DashboardPage() {
         </div>
 
         <div className="card mb-5">
-          <div className="flex items-center justify-between px-6 py-5 border-b border-border">
+          <div className="flex items-center justify-between px-4 sm:px-6 py-5 border-b border-border">
             <h3 className="font-extrabold text-base">Kalender Pencatatan</h3>
-            <span className="text-xs text-faint font-medium">Klik tanggal untuk lompat ke catatannya</span>
+            <span className="text-xs text-faint font-medium hidden sm:block">Klik tanggal untuk lompat ke catatannya</span>
           </div>
           <Calendar checkins={checkins} />
         </div>
 
         <div className="card">
-          <div className="px-6 py-5 border-b border-border">
+          <div className="px-4 sm:px-6 py-5 border-b border-border">
             <h3 className="font-extrabold text-base">Log Harian</h3>
           </div>
           <ul>
             {checkins.length === 0 && (
-              <li className="px-6 py-8 text-sm text-soft text-center">Belum ada catatan harian.</li>
+              <li className="px-4 sm:px-6 py-8 text-sm text-soft text-center">Belum ada catatan harian.</li>
             )}
             {checkins.slice().reverse().map((c) => (
-              <li key={c.id} id={`log-${c.checkin_date}`} className="grid grid-cols-[82px_1fr_auto] gap-3.5 px-6 py-3.5 border-t border-border/60 first:border-t-0 items-start">
+              <li key={c.id} id={`log-${c.checkin_date}`} className="grid grid-cols-[70px_1fr_auto] sm:grid-cols-[82px_1fr_auto] gap-3 px-4 sm:px-6 py-3.5 border-t border-border/60 first:border-t-0 items-start">
                 <div className="text-xs text-faint font-bold pt-0.5">{c.checkin_date}</div>
                 <div className="text-sm leading-relaxed">
                   <div className="flex gap-1.5 mb-1 flex-wrap">

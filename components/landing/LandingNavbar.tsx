@@ -108,9 +108,7 @@ export default function LandingNavbar() {
 
         <div
           id="mobile-menu"
-          className={`md:hidden origin-top transition-all duration-200 ${
-            open ? "opacity-100 scale-100" : "pointer-events-none opacity-0 scale-95"
-          }`}
+          className={`md:hidden ${open ? "block" : "hidden"}`}
         >
           <div className="mt-3 rounded-3xl border border-border bg-white p-3 shadow-[0_8px_30px_rgba(31,41,55,0.18)]">
             <nav className="flex flex-col gap-0.5">

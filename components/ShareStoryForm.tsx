@@ -32,15 +32,15 @@ export default function ShareStoryForm() {
 
   if (!open) {
     return (
-      <button onClick={() => setOpen(true)} className="btn-primary">
+      <button onClick={() => setOpen(true)} className="btn-primary w-full sm:w-auto justify-center">
         Bagikan Cerita
       </button>
     );
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-[110] p-5" onClick={() => setOpen(false)}>
-      <div className="card w-full max-w-[480px] p-6" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-[2px] flex items-start sm:items-center justify-center z-[110] p-5 overflow-y-auto" onClick={() => setOpen(false)}>
+      <div className="card w-full max-w-[480px] p-5 sm:p-6" onClick={(e) => e.stopPropagation()}>
         <h3 className="text-lg font-extrabold mb-1.5">Bagikan pengalamanmu</h3>
         <p className="text-xs text-soft mb-4 leading-relaxed">
           Cerita ini bisa dilihat caregiver lain di Komunitas. Jangan sertakan info identitas pasien secara detail ya.

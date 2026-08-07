@@ -18,8 +18,8 @@ export default function SosButton() {
       </button>
 
       {open && (
-        <div className="fixed inset-0 bg-black/45 backdrop-blur-[2px] flex items-center justify-center z-[120] p-5" onClick={() => setOpen(false)}>
-          <div className="card w-full max-w-[420px] p-7" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/45 backdrop-blur-[2px] flex items-start sm:items-center justify-center z-[120] p-5 overflow-y-auto" onClick={() => setOpen(false)}>
+          <div className="card w-full max-w-[420px] p-5 sm:p-7" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-lg font-extrabold mb-1.5">Butuh bantuan segera?</h3>
             <p className="text-[13px] text-soft mb-5 leading-relaxed">
               Tenang dulu. Pilih salah satu di bawah — semua nomor ini bisa langsung dihubungi dari HP kamu.
@@ -42,16 +42,6 @@ export default function SosButton() {
               <div>
                 <p className="text-sm font-bold m-0">Sejiwa — 119 ext 8</p>
                 <span className="text-xs text-soft">Layanan sehat jiwa Kemenkes, siaga 24 jam</span>
-              </div>
-            </a>
-
-            <a href="tel:081234567890" className="flex items-center gap-3.5 w-full p-3.5 rounded-2xl border-[1.5px] border-border hover:bg-primary-light transition mb-3">
-              <span className="w-[38px] h-[38px] rounded-xl bg-primary-light text-primary flex items-center justify-center flex-none">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.9}><circle cx="12" cy="8" r="3.2" /><path d="M5 20c0-4 3-6.5 7-6.5s7 2.5 7 6.5" strokeLinecap="round" /></svg>
-              </span>
-              <div>
-                <p className="text-sm font-bold m-0">Hubungi dr. Yudha, Sp.KJ</p>
-                <span className="text-xs text-soft">Psikiater yang menangani</span>
               </div>
             </a>
 

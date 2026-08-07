@@ -21,7 +21,7 @@ export default async function InsightPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <TopNav patientName={patient.name} patientAge={patient.age} />
-      <div className="flex-1 px-[5vw] py-8 max-w-[1180px] mx-auto w-full">
+      <div className="flex-1 px-4 md:px-[5vw] py-8 max-w-[1180px] mx-auto w-full">
         <div className="mb-6">
           <h2 className="text-2xl font-extrabold mb-1">Insight Klinis</h2>
           <p className="text-sm text-soft">Satu klik, catatan harian jadi pola yang siap dibawa ke psikiater.</p>
