@@ -77,13 +77,22 @@ export default function LoginPage() {
         return;
       }
 
+      // Session langsung ada kalau "Confirm email" nonaktif — masuk sekarang.
       if (data.session) {
-        // Konfirmasi email nonaktif — langsung masuk.
         router.push("/dashboard");
         router.refresh();
-      } else {
-        setCheckEmail(true);
+        return;
       }
+
+      // Fallback: coba login langsung agar tidak perlu menunggu konfirmasi email.
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      if (!signInError) {
+        router.push("/dashboard");
+        router.refresh();
+        return;
+      }
+
+      setCheckEmail(true);
       return;
     }
 
