@@ -35,7 +35,7 @@ cp .env.example .env.local
 
 Isi tiga variabel di `.env.local`:
 - `NEXT_PUBLIC_SUPABASE_URL` dan `NEXT_PUBLIC_SUPABASE_ANON_KEY` — dari Supabase.
-- `ANTHROPIC_API_KEY` — dari [console.anthropic.com](https://console.anthropic.com).
+- `GEMINI_API_KEY` — dari [Google AI Studio](https://aistudio.google.com/app/apikey).
 
 ## 4. Tambahkan foto
 

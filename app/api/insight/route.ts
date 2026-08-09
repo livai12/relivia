@@ -15,6 +15,52 @@ Rules:
 - Respond with ONLY strict JSON matching this shape, no markdown, no preamble:
   {"risk_category": "low" | "medium" | "high", "contributing_factors": string[], "clinical_summary": string}`;
 
+const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent";
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+async function callGemini(payload: unknown): Promise<Response> {
+  return fetch(GEMINI_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-goog-api-key": process.env.GEMINI_API_KEY ?? "",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+}
+
+async function geminiErrorDetail(res: Response) {
+  const text = await res.text();
+  try {
+    const body = JSON.parse(text);
+    return (body.error?.status ?? "") + " " + (body.error?.message ?? text);
+  } catch {
+    return text || `HTTP ${res.status}`;
+  }
+}
+
+function messageFor(status: number, detail: string) {
+  const d = detail.toLowerCase();
+  if (status === 429 || d.includes("resource_exhausted")) {
+    if (d.includes("rate_limit") || d.includes("requests per")) {
+      return "Terlalu banyak permintaan dalam satu menit — tunggu sebentar lalu coba lagi.";
+    }
+    return "Kuota Gemini API habis/ulang permintaan belum tersedia. Cek kuota hari ini di aistudio.google.com, lalu coba lagi nanti.";
+  }
+  if (status === 401 || status === 403) {
+    return "Kunci Gemini API tidak valid atau tidak boleh mengakses model ini. Periksa GEMINI_API_KEY di .env.local.";
+  }
+  if (status === 404) {
+    return "Model Gemini tidak tersedia untuk kunci API ini. Cek model yang didukung di aistudio.google.com.";
+  }
+  if (status >= 500) {
+    return "Layanan Gemini sedang sibuk — coba lagi dalam beberapa saat.";
+  }
+  return `Gemini menolak permintaan (${status}).`;
+}
+
 export async function POST() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -36,9 +82,9 @@ export async function POST() {
     );
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!process.env.GEMINI_API_KEY) {
     return NextResponse.json(
-      { error: "ANTHROPIC_API_KEY belum diset di environment variables." },
+      { error: "GEMINI_API_KEY belum diset di environment variables." },
       { status: 500 }
     );
   }
@@ -52,30 +98,46 @@ export async function POST() {
     note: c.free_text_note,
   }));
 
-  const anthropicRes = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": process.env.ANTHROPIC_API_KEY,
-      "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-6",
-      max_tokens: 800,
-      system: SYSTEM_PROMPT,
-      messages: [
-        { role: "user", content: `14-day caregiver observation data (JSON):\n${JSON.stringify(inputData, null, 2)}` },
-      ],
-    }),
-  });
+  const payload = {
+    systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+    contents: [{ role: "user", parts: [{ text: `14-day caregiver observation data (JSON):\n${JSON.stringify(inputData, null, 2)}` }] }],
+    generationConfig: { maxOutputTokens: 800, responseMimeType: "application/json" },
+  };
 
-  if (!anthropicRes.ok) {
-    const detail = await anthropicRes.text();
-    return NextResponse.json({ error: "Gagal memanggil Anthropic API", detail }, { status: 502 });
+  // Retry transient failures (429 rate-limit / 5xx) with exponential backoff.
+  let geminiRes: Response | null = null;
+  for (let attempt = 0; attempt <= 2; attempt++) {
+    geminiRes = await callGemini(payload);
+    if (geminiRes.ok) break;
+    const detail = await geminiErrorDetail(geminiRes);
+    if (geminiRes.status === 429 && detail.toLowerCase().includes("requests per")) {
+      // Retry on explicit rate-limit window.
+      const retryMs = Number(geminiRes.headers.get("retry-after") ?? "") * 1000;
+      await sleep(retryMs > 0 && attempt < 2 ? retryMs : 1000 * 2 ** attempt);
+      continue;
+    }
+    if (geminiRes.status >= 500 && attempt < 2) {
+      await sleep(1000 * 2 ** attempt);
+      continue;
+    }
+    return NextResponse.json({ error: messageFor(geminiRes.status, detail), detail }, { status: geminiRes.status });
   }
 
-  const data = await anthropicRes.json();
-  const rawText: string = data.content?.find((b: any) => b.type === "text")?.text ?? "{}";
+  if (!geminiRes || !geminiRes.ok) {
+    const detail = geminiRes ? await geminiErrorDetail(geminiRes) : "Gemini API tidak merespons.";
+    return NextResponse.json(
+      { error: messageFor(geminiRes?.status ?? 502, detail), detail },
+      { status: geminiRes?.status ?? 502 }
+    );
+  }
+
+  const data = await geminiRes.json();
+  const rawText: string =
+    data.candidates?.[0]?.content?.parts?.map((p: any) => p.text ?? "").join("") ?? "";
+
+  if (!rawText.trim()) {
+    return NextResponse.json({ error: "Gemini mengembalikan respons tanpa isi.", raw: data }, { status: 502 });
+  }
 
   let parsed: { risk_category: string; contributing_factors: string[]; clinical_summary: string };
   try {

@@ -16,10 +16,10 @@ export default async function DashboardPage() {
     .from("daily_checkins")
     .select("*")
     .eq("patient_id", patient.id)
-    .order("checkin_date", { ascending: true })
+    .order("checkin_date", { ascending: false })
     .limit(14);
 
-  const checkins = (checkinsRaw ?? []) as DailyCheckin[];
+  const checkins = ((checkinsRaw ?? []) as DailyCheckin[]).reverse();
   const last7 = checkins.slice(-7);
   const adherence = last7.length
     ? Math.round((last7.filter((c) => c.medication_taken).length / last7.length) * 100)

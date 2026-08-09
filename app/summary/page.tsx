@@ -22,10 +22,10 @@ export default async function SummaryPage() {
     .from("daily_checkins")
     .select("*")
     .eq("patient_id", patient.id)
-    .order("checkin_date", { ascending: true })
+    .order("checkin_date", { ascending: false })
     .limit(30);
 
-  const checkins = (checkinsRaw ?? []) as DailyCheckin[];
+  const checkins = ((checkinsRaw ?? []) as DailyCheckin[]).reverse();
   const insight = latest as AiInsight | null;
 
   return (
