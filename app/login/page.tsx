@@ -16,6 +16,25 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [checkEmail, setCheckEmail] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resent, setResent] = useState(false);
+
+  async function resendEmail() {
+    setResending(true);
+    setError(null);
+    setResent(false);
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+    });
+    setResending(false);
+    if (error) {
+      setError(error.message);
+      return;
+    }
+    setResent(true);
+  }
 
   async function handleGoogleSignIn() {
     setGoogleLoading(true);
@@ -49,7 +68,7 @@ export default function LoginPage() {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=/dashboard` },
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
       });
       setLoading(false);
 
@@ -108,19 +127,32 @@ export default function LoginPage() {
                   </svg>
                 </div>
                 <h1 className="text-xl font-extrabold mb-2">Cek email kamu dulu ya</h1>
-                <p className="text-sm text-soft leading-relaxed mb-6">
+                <p className="text-sm text-soft leading-relaxed mb-5">
                   Kami sudah kirim tautan konfirmasi ke{" "}
                   <b className="text-ink break-all">{email}</b>. Klik tautan itu agar akun aktif,
                   lalu kembali ke sini untuk masuk.
                 </p>
+                {error && <p className="text-sm text-red-deep bg-red-tint rounded-lg px-3 py-2 mb-4">{error}</p>}
+                {resent && (
+                  <p className="text-sm text-green-deep bg-green-tint rounded-lg px-3 py-2 mb-4">
+                    Email konfirmasi terkirim ulang — cek juga folder spam.
+                  </p>
+                )}
+                <button
+                  onClick={resendEmail}
+                  disabled={resending}
+                  className="btn-primary w-full justify-center disabled:opacity-60"
+                >
+                  {resending ? "Mengirim…" : "Kirim ulang email konfirmasi"}
+                </button>
                 <button
                   onClick={() => {
                     setCheckEmail(false);
                     setMode("login");
                   }}
-                  className="btn-primary w-full justify-center"
+                  className="text-sm text-soft hover:text-primary mt-4 w-full text-center"
                 >
-                  Oke, kembali ke masuk
+                  Sudah konfirmasi? Masuk
                 </button>
               </div>
             ) : (
