@@ -83,10 +83,11 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-bg px-5 sm:px-6 py-6">
-      <div className="card w-full max-w-sm p-6 sm:p-8 [perspective:1200px]">
+      <div className="w-full max-w-sm [perspective:1200px]">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={mode}
+            className="card w-full p-6 sm:p-8"
             initial={{ rotateY: 90, opacity: 0 }}
             animate={{ rotateY: 0, opacity: 1 }}
             exit={{ rotateY: -90, opacity: 0 }}
