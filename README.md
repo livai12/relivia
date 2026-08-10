@@ -83,13 +83,6 @@ components/                Nav, wizard, chart, kalender, SOS button, community f
 
 ## Cara kerja fitur-fitur baru
 
-**Berita Caregiver Dunia** (`lib/news.ts`) — server-side fetch ke RSS publik Google News
-(`news.google.com/rss/search?q=caregiver`), bukan API berbayar, jadi tidak butuh API key.
-Tiap artikel di-fetch ulang secara ringan (cuma ambil `<head>`) untuk ambil `og:image`-nya.
-Di-cache 1 jam lewat `revalidate: 3600` biar tidak membebani Google News tiap ada pengunjung.
-Kalau fetch gagal (jaringan, rate limit, dsb), fallback ke pesan "belum bisa dimuat" — tidak
-pernah menjatuhkan halaman landing.
-
 **Komunitas** — `community_posts` dan `profiles` beneran bisa dibaca semua caregiver yang
 login (RLS: `select` terbuka untuk semua `authenticated`), tapi cuma pemilik yang bisa
 edit/hapus post miliknya sendiri. Badge "Terverifikasi" dihitung otomatis oleh trigger
@@ -107,10 +100,3 @@ nomor psikiater (ganti nomor placeholder di `components/SosButton.tsx` dengan no
 browser di server, biar tetap ringan buat deploy di Vercel serverless) untuk generate
 PDF asli dari data ringkasan sesuai periode yang dipilih caregiver.
 
-## Catatan scope (dari strategi hackathon)
-
-- Satu caregiver = satu pasien untuk MVP ini (lihat `lib/getOrCreatePatient.ts`).
-- `risk_category` cuma "low/medium/high" — sengaja tidak ada angka persentase risiko,
-  supaya tidak terbaca sebagai klaim diagnosis (lihat system prompt di `app/api/insight/route.ts`).
-- Nomor psikiater di tombol SOS masih placeholder (`081234567890`) — wajib diganti sebelum
-  demo/production sungguhan.
