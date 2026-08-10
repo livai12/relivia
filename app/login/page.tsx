@@ -79,6 +79,7 @@ export default function LoginPage() {
 
       // Session langsung ada kalau "Confirm email" nonaktif — masuk sekarang.
       if (data.session) {
+        sessionStorage.setItem("registered", "1");
         router.push("/dashboard");
         router.refresh();
         return;
@@ -87,6 +88,7 @@ export default function LoginPage() {
       // Fallback: coba login langsung agar tidak perlu menunggu konfirmasi email.
       const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
       if (!signInError) {
+        sessionStorage.setItem("registered", "1");
         router.push("/dashboard");
         router.refresh();
         return;
@@ -129,6 +131,9 @@ export default function LoginPage() {
 
             {checkEmail ? (
               <div className="text-center pt-2">
+                <p className="text-sm font-bold text-green-deep bg-green-tint rounded-xl px-4 py-3 mb-4">
+                  Pendaftaran berhasil!
+                </p>
                 <div className="w-[64px] h-[64px] rounded-full bg-primary-light text-primary flex items-center justify-center mx-auto mb-4">
                   <svg className="w-7 h-7" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.9}>
                     <rect x="3" y="5" width="18" height="14" rx="3" />

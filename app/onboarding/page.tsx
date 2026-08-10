@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Logo from "@/components/Logo";
 import { completeOnboarding } from "./actions";
 
@@ -12,6 +12,14 @@ export default function OnboardingPage() {
   const [patientAge, setPatientAge] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [registered, setRegistered] = useState(false);
+
+  useEffect(() => {
+    if (window.sessionStorage.getItem("registered") === "1") {
+      setRegistered(true);
+      window.sessionStorage.removeItem("registered");
+    }
+  }, []);
 
   function goStep1() {
     if (!caregiverName.trim() || !city.trim()) {
@@ -54,6 +62,12 @@ export default function OnboardingPage() {
           <div className={`flex-1 h-1.5 rounded-full transition-colors ${step >= 0 ? "bg-primary" : "bg-border"}`} />
           <div className={`flex-1 h-1.5 rounded-full transition-colors ${step >= 1 ? "bg-primary" : "bg-border"}`} />
         </div>
+
+        {registered && (
+          <div className="text-sm font-bold text-green-deep bg-green-tint rounded-xl px-4 py-3 mb-6">
+            Pendaftaran berhasil!
+          </div>
+        )}
 
         {step === 0 && (
           <div className="animate-[rise_0.3s_ease]">
