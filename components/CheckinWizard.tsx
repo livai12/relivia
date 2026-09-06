@@ -46,10 +46,13 @@ export default function CheckinWizard({ patientName }: { patientName: string }) 
     sleep_quality: 0,
     social_interaction: 0,
     medication_taken: null as boolean | null,
+    appetite: "" as "decreased" | "normal" | "increased" | "",
+    self_care: "" as "decreased" | "normal" | "improved" | "",
+    behavior_change: false,
     free_text_note: "",
   });
 
-  const totalSteps = 5;
+  const totalSteps = 7;
 
   async function handleSubmit() {
     setSubmitting(true);
@@ -59,6 +62,9 @@ export default function CheckinWizard({ patientName }: { patientName: string }) 
         sleep_quality: form.sleep_quality,
         social_interaction: form.social_interaction,
         medication_taken: form.medication_taken ?? true,
+        appetite: (form.appetite || "normal") as "decreased" | "normal" | "increased",
+        self_care: (form.self_care || "normal") as "decreased" | "normal" | "improved",
+        behavior_change: form.behavior_change,
         free_text_note: form.free_text_note,
       });
       setSuccess(true);
@@ -94,19 +100,12 @@ export default function CheckinWizard({ patientName }: { patientName: string }) 
         ))}
       </div>
 
+      {/* Step 0 — Mood */}
       {step === 0 && (
-        <Step
-          eyebrow="LANGKAH 1 DARI 5"
-          title={`Gimana suasana hati ${patientName} hari ini?`}
-          hint="Lihat secara umum ya, nggak perlu detail banget."
-        >
+        <Step eyebrow="LANGKAH 1 DARI 7" title={`Gimana suasana hati ${patientName} hari ini?`} hint="Lihat secara umum ya, nggak perlu detail banget.">
           <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-2.5">
             {MOOD_OPTIONS.map((o) => (
-              <button
-                key={o.v}
-                onClick={() => { setForm({ ...form, mood: o.v }); setStep(1); }}
-                className={`opt-card ${form.mood === o.v ? "selected" : ""}`}
-              >
+              <button key={o.v} onClick={() => { setForm({ ...form, mood: o.v }); setStep(1); }} className={`opt-card ${form.mood === o.v ? "selected" : ""}`}>
                 {o.icon}
                 <span className="text-[11px] sm:text-xs font-semibold text-soft">{o.label}</span>
               </button>
@@ -115,15 +114,12 @@ export default function CheckinWizard({ patientName }: { patientName: string }) 
         </Step>
       )}
 
+      {/* Step 1 — Sleep */}
       {step === 1 && (
-        <Step eyebrow="LANGKAH 2 DARI 5" title="Semalam tidurnya gimana?" hint="Perkiraan aja, nggak perlu catat jam pastinya." onBack={() => setStep(0)}>
+        <Step eyebrow="LANGKAH 2 DARI 7" title="Semalam tidurnya gimana?" hint="Perkiraan aja, nggak perlu catat jam pastinya." onBack={() => setStep(0)}>
           <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-2.5">
             {SLEEP_OPTIONS.map((o) => (
-              <button
-                key={o.v}
-                onClick={() => { setForm({ ...form, sleep_quality: o.v }); setStep(2); }}
-                className={`opt-card ${form.sleep_quality === o.v ? "selected" : ""}`}
-              >
+              <button key={o.v} onClick={() => { setForm({ ...form, sleep_quality: o.v }); setStep(2); }} className={`opt-card ${form.sleep_quality === o.v ? "selected" : ""}`}>
                 {o.icon}
                 <span className="text-[11px] sm:text-xs font-semibold text-soft">{o.label}</span>
               </button>
@@ -132,15 +128,12 @@ export default function CheckinWizard({ patientName }: { patientName: string }) 
         </Step>
       )}
 
+      {/* Step 2 — Social */}
       {step === 2 && (
-        <Step eyebrow="LANGKAH 3 DARI 5" title="Gimana interaksi sosialnya?" hint="Ngobrol, keluar kamar, respons ke keluarga." onBack={() => setStep(1)}>
+        <Step eyebrow="LANGKAH 3 DARI 7" title="Gimana interaksi sosialnya?" hint="Ngobrol, keluar kamar, respons ke keluarga." onBack={() => setStep(1)}>
           <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-2.5">
             {SOCIAL_OPTIONS.map((o) => (
-              <button
-                key={o.v}
-                onClick={() => { setForm({ ...form, social_interaction: o.v }); setStep(3); }}
-                className={`opt-card ${form.social_interaction === o.v ? "selected" : ""}`}
-              >
+              <button key={o.v} onClick={() => { setForm({ ...form, social_interaction: o.v }); setStep(3); }} className={`opt-card ${form.social_interaction === o.v ? "selected" : ""}`}>
                 {o.icon}
                 <span className="text-[11px] sm:text-xs font-semibold text-soft">{o.label}</span>
               </button>
@@ -149,31 +142,96 @@ export default function CheckinWizard({ patientName }: { patientName: string }) 
         </Step>
       )}
 
+      {/* Step 3 — Medication */}
       {step === 3 && (
-        <Step eyebrow="LANGKAH 4 DARI 5" title="Obat hari ini gimana?" onBack={() => setStep(2)}>
-          <div className="flex gap-3.5">
+        <Step eyebrow="LANGKAH 4 DARI 7" title="Obat hari ini gimana?" onBack={() => setStep(2)}>
+          <div className="flex flex-col gap-3">
+            {[
+              { label: "Diminum sesuai jadwal", val: true, color: "green" },
+              { label: "Terlewat / ditolak", val: false, color: "red" },
+            ].map((o) => (
+              <button
+                key={String(o.val)}
+                onClick={() => { setForm({ ...form, medication_taken: o.val }); setStep(4); }}
+                className={`py-5 rounded-2xl border-2 font-bold text-sm transition ${
+                  form.medication_taken === o.val
+                    ? o.color === "green" ? "border-green bg-green-tint text-green-deep" : "border-red bg-red-tint text-red-deep"
+                    : "border-border hover:border-primary/40"
+                }`}
+              >
+                {o.label}
+              </button>
+            ))}
             <button
               onClick={() => { setForm({ ...form, medication_taken: true }); setStep(4); }}
-              className={`flex-1 py-6 rounded-2xl border-2 font-bold text-sm transition ${
-                form.medication_taken === true ? "border-green bg-green-tint text-green-deep" : "border-border"
-              }`}
+              className="py-3.5 rounded-2xl border-2 border-dashed border-border font-semibold text-sm text-soft hover:border-primary/40 transition"
             >
-              Diminum sesuai jadwal
-            </button>
-            <button
-              onClick={() => { setForm({ ...form, medication_taken: false }); setStep(4); }}
-              className={`flex-1 py-6 rounded-2xl border-2 font-bold text-sm transition ${
-                form.medication_taken === false ? "border-red bg-red-tint text-red-deep" : "border-border"
-              }`}
-            >
-              Terlewat / ditolak
+              Tidak tahu / tidak bisa memastikan
             </button>
           </div>
         </Step>
       )}
 
+      {/* Step 4 — Appetite */}
       {step === 4 && (
-        <Step eyebrow="LANGKAH 5 DARI 5" title="Ada yang ingin dicatat?" hint="Opsional — kata-kata yang diucapkan, kebiasaan yang berubah, apa saja." onBack={() => setStep(3)}>
+        <Step eyebrow="LANGKAH 5 DARI 7" title="Bagaimana nafsu makannya?" onBack={() => setStep(3)}>
+          <div className="flex flex-col gap-3">
+            {[
+              { v: "decreased", label: "Berkurang dari biasanya" },
+              { v: "normal", label: "Normal seperti biasa" },
+              { v: "increased", label: "Bertambah dari biasanya" },
+            ].map((o) => (
+              <button
+                key={o.v}
+                onClick={() => { setForm({ ...form, appetite: o.v as "decreased" | "normal" | "increased" }); setStep(5); }}
+                className={`py-5 rounded-2xl border-2 font-bold text-sm transition ${
+                  form.appetite === o.v ? "border-primary bg-primary-light text-primary-dark" : "border-border hover:border-primary/40"
+                }`}
+              >
+                {o.label}
+              </button>
+            ))}
+          </div>
+        </Step>
+      )}
+
+      {/* Step 5 — Self-care */}
+      {step === 5 && (
+        <Step eyebrow="LANGKAH 6 DARI 7" title="Bagaimana kebersihan & perawatan diri?" hint="Mandi, ganti baju, kebersihan umum." onBack={() => setStep(4)}>
+          <div className="flex flex-col gap-3">
+            {[
+              { v: "decreased", label: "Menurun, kurang merawat diri" },
+              { v: "normal", label: "Normal seperti biasa" },
+              { v: "improved", label: "Lebih baik dari biasanya" },
+            ].map((o) => (
+              <button
+                key={o.v}
+                onClick={() => { setForm({ ...form, self_care: o.v as "decreased" | "normal" | "improved" }); setStep(6); }}
+                className={`py-5 rounded-2xl border-2 font-bold text-sm transition ${
+                  form.self_care === o.v ? "border-primary bg-primary-light text-primary-dark" : "border-border hover:border-primary/40"
+                }`}
+              >
+                {o.label}
+              </button>
+            ))}
+          </div>
+        </Step>
+      )}
+
+      {/* Step 6 — Notes + behavior change */}
+      {step === 6 && (
+        <Step eyebrow="LANGKAH 7 DARI 7" title="Ada yang ingin dicatat?" hint="Opsional — kata-kata, kebiasaan yang berubah, apa saja." onBack={() => setStep(5)}>
+          <div className="mb-4">
+            <label className="flex items-center gap-3 p-4 rounded-2xl border-2 border-border cursor-pointer hover:border-primary/40 transition select-none">
+              <input
+                type="checkbox"
+                checked={form.behavior_change}
+                onChange={(e) => setForm({ ...form, behavior_change: e.target.checked })}
+                className="w-5 h-5 rounded accent-primary cursor-pointer"
+              />
+              <span className="text-sm font-semibold">Ada perubahan perilaku yang menonjol hari ini</span>
+            </label>
+          </div>
           <textarea
             value={form.free_text_note}
             onChange={(e) => setForm({ ...form, free_text_note: e.target.value })}
@@ -181,7 +239,7 @@ export default function CheckinWizard({ patientName }: { patientName: string }) 
             className="w-full text-sm p-4 rounded-2xl border-2 border-border min-h-[110px] focus:outline-none focus:border-primary text-left"
           />
           <div className="flex items-center justify-center gap-3.5 mt-7">
-            <button onClick={() => setStep(3)} className="text-soft hover:text-ink font-semibold text-sm px-2.5 py-3.5">Kembali</button>
+            <button onClick={() => setStep(5)} className="text-soft hover:text-ink font-semibold text-sm px-2.5 py-3.5">Kembali</button>
             <button onClick={handleSubmit} disabled={submitting} className="btn-primary disabled:opacity-60">
               {submitting ? "Menyimpan…" : (<>Simpan catatan hari ini <IconCheck size={15} /></>)}
             </button>

@@ -24,7 +24,7 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  const authRequiredPaths = ["/dashboard", "/checkin", "/insight", "/summary", "/community", "/onboarding"];
+  const authRequiredPaths = ["/dashboard", "/checkin", "/insight", "/summary", "/community", "/onboarding", "/agent", "/health"];
   const isAuthRequired = authRequiredPaths.some((p) => request.nextUrl.pathname.startsWith(p));
 
   if (isAuthRequired && !user) {
@@ -37,7 +37,7 @@ export async function middleware(request: NextRequest) {
   // behind onboarding completeness: a caregiver must have set patient
   // name/age before they can use the app. One lightweight query per navigation
   // is an acceptable tradeoff for correctness over a stale cached flag.
-  const onboardingRequiredPaths = ["/dashboard", "/checkin", "/insight", "/summary", "/community"];
+  const onboardingRequiredPaths = ["/dashboard", "/checkin", "/insight", "/summary", "/community", "/agent", "/health"];
   const needsOnboardingCheck = onboardingRequiredPaths.some((p) => request.nextUrl.pathname.startsWith(p));
 
   if (needsOnboardingCheck && user) {
@@ -58,5 +58,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/checkin/:path*", "/insight/:path*", "/summary/:path*", "/community/:path*", "/onboarding/:path*"],
+  matcher: ["/dashboard/:path*", "/checkin/:path*", "/insight/:path*", "/summary/:path*", "/community/:path*", "/onboarding/:path*", "/agent/:path*", "/health/:path*"],
 };

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+import AutoMonitorProvider from "@/components/AutoMonitorProvider";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -22,7 +23,9 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="id" className={jakarta.variable}>
-      <body className="font-sans">{children}</body>
+      <body className="font-sans">
+        <AutoMonitorProvider>{children}</AutoMonitorProvider>
+      </body>
     </html>
   );
 }

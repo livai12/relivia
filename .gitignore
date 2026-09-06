@@ -1,6 +1,13 @@
 node_modules
 .next
+out
 .env
 .env.local
 .vercel
 *.log
+# Android build outputs (source under android/app/src is committed)
+android/app/build
+android/.gradle
+android/app/.cxx
+android/local.properties
+android/capacitor-cordova-android-plugins/

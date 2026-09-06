@@ -127,3 +127,23 @@ nomor psikiater (ganti nomor placeholder di `components/SosButton.tsx` dengan no
 browser di server, biar tetap ringan buat deploy di Vercel serverless) untuk generate
 PDF asli dari data ringkasan sesuai periode yang dipilih caregiver.
 
+## Automatic Monitoring & Android (Capacitor)
+
+Alur otomatis: Health Connect → background sync → baseline personal →
+deteksi perubahan → Relivia Agent → notifikasi → tap → pertanyaan agent →
+jawaban → re-analisis → Clinical Insight → Consultation Brief.
+
+1. Jalankan migrasi `supabase/migrations/02_auto_monitoring.sql` setelah `schema.sql`.
+2. Deploy web ke Vercel, isi `server.url` di `capacitor.config.ts` dengan URL deploy.
+3. `npm run build:android` (build + `npx cap sync android`), buka `npx cap open android`,
+   lalu build APK dari Android Studio (butuh Android SDK + Health Connect di perangkat).
+4. Demo tanpa perangkat: halaman `/health` → "Seed 7 Hari Baseline" → "Simulasi Hari
+   Perubahan" → pipeline otomatis jalan (deteksi + sesi agent + notifikasi), buka `/agent`
+   untuk menjawab pertanyaan dan melihat insight.
+
+File kunci: `android/app/src/main/java/com/relivia/app/` (plugin `ReliviaHealthPlugin`,
+`HealthSyncWorker` 6-jam, `HealthConnectReader`, `NotificationHelper`),
+`lib/autoTrigger.ts`, `lib/nativeBridge.ts`, `lib/healthSyncQueue.ts`,
+`app/api/health-sync/route.ts`, `app/api/agent/session/[id]/route.ts`,
+`app/api/notifications/dispatch/route.ts`, `components/AutoMonitorProvider.tsx`.
+

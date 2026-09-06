@@ -5,14 +5,16 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
-import { IconHome, IconEdit, IconSparkle, IconFileText, IconUsers } from "@/components/Icons";
+import { IconHome, IconEdit, IconFlame, IconSparkle, IconAlertTriangle, IconFileText, IconUsers } from "@/components/Icons";
 import Logo from "@/components/Logo";
 import SosButton from "@/components/SosButton";
 
 const items = [
   { href: "/dashboard", label: "Dasbor", Icon: IconHome },
   { href: "/checkin", label: "Catatan Harian", Icon: IconEdit },
-  { href: "/insight", label: "Insight Klinis", Icon: IconSparkle },
+  { href: "/health", label: "Kesehatan", Icon: IconFlame },
+  { href: "/agent", label: "Agent", Icon: IconSparkle },
+  { href: "/insight", label: "Insight", Icon: IconAlertTriangle },
   { href: "/summary", label: "Ringkasan", Icon: IconFileText },
   { href: "/community", label: "Komunitas", Icon: IconUsers },
 ];

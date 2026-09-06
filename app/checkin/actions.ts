@@ -9,6 +9,9 @@ export type CheckinInput = {
   sleep_quality: number;
   social_interaction: number;
   medication_taken: boolean;
+  appetite: "decreased" | "normal" | "increased";
+  self_care: "decreased" | "normal" | "improved";
+  behavior_change: boolean;
   free_text_note: string;
 };
 
@@ -25,6 +28,9 @@ export async function submitCheckin(input: CheckinInput) {
       sleep_quality: input.sleep_quality,
       social_interaction: input.social_interaction,
       medication_taken: input.medication_taken,
+      appetite: input.appetite,
+      self_care: input.self_care,
+      behavior_change: input.behavior_change,
       free_text_note: input.free_text_note || null,
     },
     { onConflict: "patient_id,checkin_date" }

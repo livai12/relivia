@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import type { DailyCheckin, AiInsight } from "@/lib/types";
+import type { DailyCheckin, AiInsight, ClinicalInsight, ConsultationBrief } from "@/lib/types";
 
 const PERIODS = [
   { days: 7, label: "1 minggu" },
@@ -12,17 +12,24 @@ const PERIODS = [
 export default function SummaryClient({
   checkins,
   insight,
+  agentInsight,
+  consultationBrief,
   patientName,
+  patientId,
 }: {
   checkins: DailyCheckin[];
   insight: AiInsight | null;
+  agentInsight: ClinicalInsight | null;
+  consultationBrief: ConsultationBrief | null;
   patientName: string;
+  patientId: string;
 }) {
   const [periodDays, setPeriodDays] = useState(7);
+  const [generating, setGenerating] = useState(false);
+  const [brief, setBrief] = useState<ConsultationBrief | null>(consultationBrief);
+  const [error, setError] = useState<string | null>(null);
 
-  const slice = useMemo(() => {
-    return checkins.slice(-Math.min(periodDays, checkins.length));
-  }, [checkins, periodDays]);
+  const slice = useMemo(() => checkins.slice(-Math.min(periodDays, checkins.length)), [checkins, periodDays]);
 
   const adherence = slice.length
     ? Math.round((slice.filter((c) => c.medication_taken).length / slice.length) * 100)
@@ -31,6 +38,25 @@ export default function SummaryClient({
   const periodLabel = PERIODS.find((p) => p.days === periodDays)?.label ?? "";
   const rangeLabel = slice.length ? `${slice[0].checkin_date} – ${slice[slice.length - 1].checkin_date}` : "-";
   const riskLabel = insight?.risk_category === "high" ? "Tinggi" : insight?.risk_category === "medium" ? "Sedang" : insight ? "Rendah" : "-";
+
+  async function generateBrief() {
+    setGenerating(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/consultation/${patientId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ insight_id: agentInsight?.id }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? "Gagal membuat brief");
+      setBrief(json.brief);
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setGenerating(false);
+    }
+  }
 
   async function handleDownloadPdf() {
     const { jsPDF } = await import("jspdf");
@@ -54,7 +80,9 @@ export default function SummaryClient({
     doc.text(`Pasien: ${patientName}`, marginX, y); y += 16;
     doc.text(`Periode: ${rangeLabel} (${periodLabel})`, marginX, y); y += 16;
     doc.text(`Kepatuhan obat periode ini: ${adherence}%`, marginX, y); y += 16;
-    doc.text(`Kategori perhatian: ${riskLabel}`, marginX, y); y += 28;
+    if (!agentInsight) {
+      doc.text(`Kategori perhatian: ${riskLabel}`, marginX, y); y += 28;
+    }
 
     function section(title: string, body: string) {
       doc.setFont("helvetica", "bold");
@@ -68,26 +96,36 @@ export default function SummaryClient({
       y += lines.length * 14 + 18;
     }
 
-    section(
-      "Faktor yang teramati",
-      insight?.contributing_factors?.length
+    // Prefer agent brief content
+    if (brief?.full_content) {
+      section("Consultation Brief (AI Agent)", brief.full_content);
+    }
+    if (brief?.key_changes?.length) {
+      section("Perubahan Utama", brief.key_changes.map((c, i) => `${i + 1}. ${c}`).join("\n"));
+    }
+    if (brief?.caregiver_observation) {
+      section("Observasi Caregiver", brief.caregiver_observation);
+    }
+    if (brief?.questions_for_consultation?.length) {
+      section("Poin untuk Konsultasi", brief.questions_for_consultation.map((q, i) => `${i + 1}. ${q}`).join("\n"));
+    }
+    if (agentInsight?.interpretation) {
+      section("Interpretasi", agentInsight.interpretation);
+    }
+    if (!brief && insight) {
+      section("Faktor yang teramati", insight.contributing_factors?.length
         ? insight.contributing_factors.map((f, i) => `${i + 1}. ${f}`).join("\n")
         : "Belum ada insight yang dibuat untuk periode ini."
-    );
-    section(
-      "Ringkasan klinis",
-      insight?.summary_text ?? "-"
-    );
+      );
+      section("Ringkasan klinis", insight.summary_text ?? "-");
+    }
 
     doc.setFontSize(8.5);
     doc.setTextColor(140);
     doc.text(
-      "Disusun otomatis oleh Relivia. Bukan alat diagnosis - dokumen ini bahan diskusi, keputusan klinis sepenuhnya di tangan psikiater.",
-      marginX,
-      780,
-      { maxWidth: 500 }
+      "Disusun otomatis oleh Relivia. Bukan alat diagnosis — dokumen ini bahan diskusi, keputusan klinis sepenuhnya di tangan psikiater.",
+      marginX, 780, { maxWidth: 500 }
     );
-
     doc.save(`ringkasan-konsultasi-${patientName.toLowerCase().replace(/\s+/g, "-")}.pdf`);
   }
 
@@ -112,10 +150,106 @@ export default function SummaryClient({
         </button>
       </div>
 
+      {/* Generate Agent Brief */}
+      {agentInsight && !brief && (
+        <div className="card p-5 mb-5 flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <div className="font-bold mb-0.5">Buat Consultation Brief dari Agent Insight</div>
+            <div className="text-sm text-soft">Gemini akan menyusun dokumen terstruktur siap pakai saat konsultasi.</div>
+          </div>
+          <button onClick={generateBrief} disabled={generating} className="btn-primary text-sm disabled:opacity-60 flex-none">
+            {generating ? "Membuat…" : "📋 Buat Brief"}
+          </button>
+        </div>
+      )}
+      {error && <div className="text-sm text-red-deep bg-red-tint rounded-xl px-4 py-3 mb-5">{error}</div>}
+
+      {/* Consultation Brief (Agent) */}
+      {brief && (
+        <div className="card max-w-[720px] p-5 md:p-10 mb-5">
+          <div className="flex flex-col sm:flex-row sm:justify-between items-start gap-2 pb-5 mb-6 border-b border-border">
+            <div>
+              <h3 className="text-xl font-extrabold mb-1">Consultation Brief</h3>
+              <div className="text-[11px] font-bold uppercase tracking-wide text-faint">Relivia Agent · Disusun otomatis</div>
+            </div>
+            <div className="text-left sm:text-right text-xs text-soft leading-relaxed">
+              Periode: {brief.observation_period_start ?? "-"} – {brief.observation_period_end ?? "-"}<br />
+              Dicetak: {new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3.5 mb-6">
+            <div className="bg-bg rounded-xl px-4 py-3">
+              <div className="text-xs text-soft font-medium">Pasien</div>
+              <div className="text-base font-extrabold">{patientName}</div>
+            </div>
+            <div className="bg-bg rounded-xl px-4 py-3">
+              <div className="text-xs text-soft font-medium">Kepatuhan Obat</div>
+              <div className="text-base font-extrabold">{brief.medication_status ?? `${adherence}%`}</div>
+            </div>
+          </div>
+
+          {brief.key_changes?.length > 0 && (
+            <div className="mb-5">
+              <h4 className="text-[11px] uppercase tracking-wide text-primary font-extrabold mb-2">Perubahan Utama</h4>
+              <ul className="space-y-1.5">
+                {brief.key_changes.map((c, i) => (
+                  <li key={i} className="flex gap-2 text-sm"><span className="text-red-deep">•</span>{c}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {Object.keys(brief.baseline_comparison ?? {}).length > 0 && (
+            <div className="mb-5">
+              <h4 className="text-[11px] uppercase tracking-wide text-primary font-extrabold mb-2">Perbandingan Baseline</h4>
+              <div className="grid gap-2">
+                {Object.entries(brief.baseline_comparison).map(([metric, v]) => (
+                  <div key={metric} className="flex items-center justify-between bg-bg rounded-xl px-4 py-3 text-sm">
+                    <span className="font-medium capitalize">{metric.replace(/_/g, " ")}</span>
+                    <span className="font-bold text-primary">{v.baseline} → {v.current}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {brief.caregiver_observation && (
+            <div className="mb-5">
+              <h4 className="text-[11px] uppercase tracking-wide text-primary font-extrabold mb-2">Observasi Caregiver</h4>
+              <p className="text-sm leading-relaxed">{brief.caregiver_observation}</p>
+            </div>
+          )}
+
+          {brief.full_content && (
+            <div className="mb-5">
+              <h4 className="text-[11px] uppercase tracking-wide text-primary font-extrabold mb-2">Ringkasan Lengkap</h4>
+              <p className="text-sm leading-relaxed whitespace-pre-wrap">{brief.full_content}</p>
+            </div>
+          )}
+
+          {brief.questions_for_consultation?.length > 0 && (
+            <div className="mb-5">
+              <h4 className="text-[11px] uppercase tracking-wide text-primary font-extrabold mb-2">Poin untuk Konsultasi</h4>
+              <ul className="space-y-1.5">
+                {brief.questions_for_consultation.map((q, i) => (
+                  <li key={i} className="flex gap-2 text-sm"><span className="text-primary font-bold">{i + 1}.</span>{q}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <div className="mt-6 pt-4 border-t border-dashed border-border text-[11px] text-faint leading-relaxed">
+            Disusun otomatis oleh Relivia dari observasi caregiver. Bukan alat diagnosis — dokumen ini bahan diskusi, keputusan klinis sepenuhnya di tangan psikiater.
+          </div>
+        </div>
+      )}
+
+      {/* Legacy Summary */}
       <div className="card max-w-[720px] p-5 md:p-10">
         <div className="flex flex-col sm:flex-row sm:justify-between items-start gap-2 pb-5 mb-6 border-b border-border">
           <div>
-            <h3 className="text-xl font-extrabold mb-1">Ringkasan Konsultasi</h3>
+            <h3 className="text-xl font-extrabold mb-1">Ringkasan Catatan Harian</h3>
             <div className="text-[11px] font-bold uppercase tracking-wide text-faint">Relivia · Catatan Caregiver Terstruktur</div>
           </div>
           <div className="text-left sm:text-right text-xs text-soft leading-relaxed">
@@ -133,12 +267,12 @@ export default function SummaryClient({
             <div className="text-xs text-soft font-medium">Kepatuhan obat periode ini</div>
             <div className="text-base font-extrabold">{adherence}%</div>
           </div>
-          <div className="bg-bg rounded-xl px-4 py-3 col-span-2">
-            <div className="text-xs text-soft font-medium">Kategori perhatian</div>
-            <div className="text-base font-extrabold text-amber-deep">
-              {insight ? riskLabel : "Belum ada insight — buat dulu di halaman Insight Klinis"}
+          {insight && (
+            <div className="bg-bg rounded-xl px-4 py-3 col-span-2">
+              <div className="text-xs text-soft font-medium">Kategori perhatian</div>
+              <div className="text-base font-extrabold text-amber-deep">{riskLabel}</div>
             </div>
-          </div>
+          )}
         </div>
 
         {insight ? (
@@ -149,16 +283,19 @@ export default function SummaryClient({
             </div>
             <div className="mb-5">
               <h4 className="text-[11px] uppercase tracking-wide text-primary font-extrabold mb-2">Faktor yang teramati</h4>
-              <p className="text-sm leading-relaxed">{insight.contributing_factors.join(" ")}</p>
+              <ul className="space-y-1.5">
+                {insight.contributing_factors.map((f, i) => (
+                  <li key={i} className="flex gap-2 text-sm"><span className="text-primary">•</span>{f}</li>
+                ))}
+              </ul>
             </div>
           </>
         ) : (
-          <p className="text-sm text-soft">Belum ada insight yang dibuat untuk periode ini.</p>
+          <p className="text-sm text-soft">Belum ada insight yang dibuat. Buat dulu di halaman Insight Klinis.</p>
         )}
 
         <div className="mt-6 pt-4 border-t border-dashed border-border text-[11px] text-faint leading-relaxed">
-          Disusun otomatis oleh Relivia dari catatan caregiver periode terpilih. Bukan alat diagnosis — dokumen ini
-          bahan diskusi, keputusan klinis sepenuhnya di tangan psikiater.
+          Disusun otomatis oleh Relivia dari catatan caregiver periode terpilih. Bukan alat diagnosis — dokumen ini bahan diskusi, keputusan klinis sepenuhnya di tangan psikiater.
         </div>
       </div>
     </div>
